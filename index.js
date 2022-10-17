@@ -3,11 +3,12 @@ var createIndices = require('quad-indices')
 
 var vertices = require('./lib/vertices')
 var utils = require('./lib/utils')
+var {BufferGeometry, BufferAttribute, Sphere, Box3} = require('three');
 
 module.exports = function createTextGeometry (opt) {
   return new TextGeometry(opt)
 }
-class TextGeometry extends THREE.BufferGeometry {
+class TextGeometry extends BufferGeometry {
   constructor (opt) {
     super()
 
@@ -68,8 +69,8 @@ class TextGeometry extends THREE.BufferGeometry {
 
     // update vertex data
     this.setIndex(indices)
-    this.setAttribute('position', new THREE.BufferAttribute(positions, 2))
-    this.setAttribute('uv', new THREE.BufferAttribute(uvs, 2))
+    this.setAttribute('position', new BufferAttribute(positions, 2))
+    this.setAttribute('uv', new BufferAttribute(uvs, 2))
 
     // update multipage data
     if (!opt.multipage && 'page' in this.attributes) {
@@ -78,13 +79,13 @@ class TextGeometry extends THREE.BufferGeometry {
     } else if (opt.multipage) {
       // enable multipage rendering
       var pages = vertices.pages(glyphs)
-      this.setAttribute('page', new THREE.BufferAttribute(pages, 1))
+      this.setAttribute('page', new BufferAttribute(pages, 1))
     }
   }
 
   computeBoundingSphere () {
     if (this.boundingSphere === null) {
-      this.boundingSphere = new THREE.Sphere()
+      this.boundingSphere = new Sphere()
     }
 
     var positions = this.attributes.position.array
@@ -97,7 +98,7 @@ class TextGeometry extends THREE.BufferGeometry {
     utils.computeSphere(positions, this.boundingSphere)
     if (isNaN(this.boundingSphere.radius)) {
       console.error(
-`THREE.BufferGeometry.computeBoundingSphere():
+`BufferGeometry.computeBoundingSphere():
 Computed radius is NaN. The
 "position" attribute is likely to have NaN values.`
       )
@@ -106,7 +107,7 @@ Computed radius is NaN. The
 
   computeBoundingBox () {
     if (this.boundingBox === null) {
-      this.boundingBox = new THREE.Box3()
+      this.boundingBox = new Box3()
     }
 
     var bbox = this.boundingBox

@@ -1,4 +1,5 @@
 var assign = require('object-assign')
+var {Texture, Color} = require('three');
 
 module.exports = function createBasicShader (opt) {
   opt = opt || {}
@@ -17,8 +18,8 @@ module.exports = function createBasicShader (opt) {
   return assign({
     uniforms: {
       opacity: { type: 'f', value: opacity },
-      map: { type: 't', value: map || new THREE.Texture() },
-      color: { type: 'c', value: new THREE.Color(color) }
+      map: { type: 't', value: map || new Texture() },
+      color: { type: 'c', value: new Color(color) }
     },
     vertexShader: [
       'attribute vec2 uv;',
