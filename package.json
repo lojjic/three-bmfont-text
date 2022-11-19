@@ -12,7 +12,7 @@
   "dependencies": {
     "array-shuffle": "^1.0.1",
     "inherits": "^2.0.1",
-    "layout-bmfont-text": "https://github.com/matterport/layout-bmfont-text#e9becf5899d055497b7d8401d16163bdaf8a0c17",
+    "layout-bmfont-text": "https://github.com/matterport/layout-bmfont-text#9a6b9bdebc6e71d517e1e466f7c22c98d69e97cd",
     "nice-color-palettes": "^3.0.0",
     "object-assign": "^4.0.1",
     "quad-indices": "^2.0.1"
