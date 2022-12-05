@@ -3,6 +3,7 @@
   "version": "3.0.1",
   "description": "renders BMFont files in ThreeJS with word-wrapping",
   "main": "index.js",
+  "module": "index.js",
   "license": "MIT",
   "author": {
     "name": "Matt DesLauriers",
