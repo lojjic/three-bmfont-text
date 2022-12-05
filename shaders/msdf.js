@@ -1,6 +1,6 @@
-var assign = require('object-assign');
-var {Texture, Color} = require('three');
-module.exports = function createMSDFShader (opt) {
+import * as assign from 'object-assign';
+import {Texture, Color} from 'three';
+export function createMSDFShader (opt) {
   opt = opt || {};
   var opacity = typeof opt.opacity === 'number' ? opt.opacity : 1;
   var alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001;

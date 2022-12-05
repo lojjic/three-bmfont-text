@@ -1,11 +1,11 @@
-var createLayout = require('layout-bmfont-text')
-var createIndices = require('quad-indices')
+import * as createLayout from 'layout-bmfont-text';
+import * as createIndices from 'quad-indices';
 
-var vertices = require('./lib/vertices')
-var utils = require('./lib/utils')
-var {BufferGeometry, BufferAttribute, Sphere, Box3} = require('three');
+import {pages,positions,uvs} from './lib/vertices';
+import {computeBox, computeSphere} from './lib/utils';
+import {BufferGeometry, BufferAttribute, Sphere, Box3} from 'three';
 
-module.exports = function createTextGeometry (opt) {
+export function createGeometry (opt) {
   return new TextGeometry(opt)
 }
 class TextGeometry extends BufferGeometry {
@@ -59,8 +59,8 @@ class TextGeometry extends BufferGeometry {
     this.visibleGlyphs = glyphs
 
     // get common vertex data
-    var positions = vertices.positions(glyphs)
-    var uvs = vertices.uvs(glyphs, texWidth, texHeight, flipY)
+    var glyphPositions = positions(glyphs)
+    var glyphUvs = uvs(glyphs, texWidth, texHeight, flipY)
     var indices = createIndices([], {
       clockwise: true,
       type: 'uint16',
@@ -69,8 +69,8 @@ class TextGeometry extends BufferGeometry {
 
     // update vertex data
     this.setIndex(indices)
-    this.setAttribute('position', new BufferAttribute(positions, 2))
-    this.setAttribute('uv', new BufferAttribute(uvs, 2))
+    this.setAttribute('position', new BufferAttribute(glyphPositions, 2))
+    this.setAttribute('uv', new BufferAttribute(glyphUvs, 2))
 
     // update multipage data
     if (!opt.multipage && 'page' in this.attributes) {
@@ -78,8 +78,8 @@ class TextGeometry extends BufferGeometry {
       this.removeAttribute('page')
     } else if (opt.multipage) {
       // enable multipage rendering
-      var pages = vertices.pages(glyphs)
-      this.setAttribute('page', new BufferAttribute(pages, 1))
+      var glyphPages = pages(glyphs)
+      this.setAttribute('page', new BufferAttribute(glyphPages, 1))
     }
   }
 
@@ -95,7 +95,7 @@ class TextGeometry extends BufferGeometry {
       this.boundingSphere.center.set(0, 0, 0)
       return
     }
-    utils.computeSphere(positions, this.boundingSphere)
+    computeSphere(positions, this.boundingSphere)
     if (isNaN(this.boundingSphere.radius)) {
       console.error(
 `BufferGeometry.computeBoundingSphere():
@@ -117,6 +117,6 @@ Computed radius is NaN. The
       bbox.makeEmpty()
       return
     }
-    utils.computeBox(positions, bbox)
+    computeBox(positions, bbox)
   }
 }
