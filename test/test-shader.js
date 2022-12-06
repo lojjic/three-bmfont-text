@@ -3,42 +3,61 @@
   a custom shader, special per-line shader effects,
   and glslify.
  */
+import * as THREE from 'three';
+import {createGeometry} from '../'
 
-global.THREE = require('three')
-var quote = require('sun-tzu-quotes')
-var createOrbitViewer = require('three-orbit-viewer')(THREE)
-var createBackground = require('three-vignette-background')
-var createText = require('../')
-var glslify = require('glslify')
+import {load} from './load';
+import {testScene} from './test-scene';
+import quote from 'sun-tzu-quotes'
 
-require('./load')({
+let duration = 3
+let time = 0
+load({
   font: 'fnt/DejaVu-sdf.fnt',
   image: 'fnt/DejaVu-sdf.png'
-}, start)
+}, init);
 
-function start (font, texture) {
-  var app = createOrbitViewer({
-    clearColor: 'rgb(40, 40, 40)',
-    clearAlpha: 1.0,
-    fov: 55,
-    position: new THREE.Vector3(1, 1, -2)
+function next (geom, text) {
+  // set new text string
+  geom.update(quote());
+  const lines = geom.visibleGlyphs.map(function (glyph) {
+    return glyph.line;
   })
 
-  var bg = createBackground()
-  app.scene.add(bg)
+  const lineCount = lines.reduce(function (a, b) {
+    return Math.max(a, b);
+  }, 0)
 
-  var geom = createText({
+  // for each quad, let's give it a vertex attribute
+  // with the line index
+  const lineData = lines.map(function (line) {
+    // map to 0..1 for attribute
+    const t = lineCount <= 1 ? 1 : (line / (lineCount - 1));
+    // quad - 4 verts
+    return [ t, t, t, t ];
+  }).reduce(function (a, b) {
+    return a.concat(b);
+  }, []);
+
+  // update the "line" vertex attribute
+  geom.setAttribute('line', new THREE.BufferAttribute(new Float32Array(lineData), 1));
+
+  // center the text
+  const layout = geom.layout;
+  text.position.x = -layout.width / 2;
+  text.position.y = layout.height / 2;
+}
+
+function init(font, texture) {
+  const geom = createGeometry({
     font: font,
     align: 'center',
     width: 500,
     flipY: texture.flipY
-  })
-
-  // geom.setAttribute('line', new Float32Array(lineData));
-
-  var material = new THREE.RawShaderMaterial({
-    vertexShader: glslify(__dirname + '/shaders/fx.vert'),
-    fragmentShader: glslify(__dirname + '/shaders/fx.frag'),
+  });
+  const material = new THREE.RawShaderMaterial({
+    vertexShader: require('./shaders/fx.vert'),
+    fragmentShader: require('./shaders/fx.frag'),
     uniforms: {
       animate: { type: 'f', value: 1 },
       iGlobalTime: { type: 'f', value: 0 },
@@ -48,68 +67,26 @@ function start (font, texture) {
     transparent: true,
     side: THREE.DoubleSide,
     depthTest: false
-  })
+  });
 
-  var text = new THREE.Mesh(geom, material)
+  const text = new THREE.Mesh(geom, material);
 
   // scale it down so it fits in our 3D units
-  var textAnchor = new THREE.Object3D()
-  textAnchor.scale.multiplyScalar(-0.005)
-  textAnchor.add(text)
-  app.scene.add(textAnchor)
+  const textAnchor = new THREE.Object3D();
+  textAnchor.scale.multiplyScalar(-0.005);
+  textAnchor.add(text);
 
-  var duration = 3
-  next()
-
-  var time = 0
-  app.on('tick', function (dt) {
-    time += dt / 1000
-    material.uniforms.iGlobalTime.value = time
-    material.uniforms.animate.value = time / duration
+  const { scene, camera, controls } = testScene({ animate: (dt) => {
+    time += dt;
+    material.uniforms.iGlobalTime.value = time;
+    material.uniforms.animate.value = time / duration;
     if (time > duration) {
-      time = 0
-      next()
+      time = 0;
+      next(geom, text);
     }
+  }});
 
-    var width = window.innerWidth
-    var height = window.innerHeight
-    bg.style({
-      aspect: width / height,
-      aspectCorrection: false,
-      scale: 2.5,
-      grainScale: 0
-    })
-  })
-
-  function next () {
-    // set new text string
-    geom.update(quote())
-
-    var lines = geom.visibleGlyphs.map(function (glyph) {
-      return glyph.line
-    })
-
-    var lineCount = lines.reduce(function (a, b) {
-      return Math.max(a, b)
-    }, 0)
-
-    // for each quad, let's give it a vertex attribute
-    // with the line index
-    var lineData = lines.map(function (line) {
-      // map to 0..1 for attribute
-      var t = lineCount <= 1 ? 1 : (line / (lineCount - 1))
-      // quad - 4 verts
-      return [ t, t, t, t ]
-    }).reduce(function (a, b) {
-      return a.concat(b)
-    }, [])
-
-    // update the "line" vertex attribute
-    geom.setAttribute('line', new THREE.BufferAttribute(new Float32Array(lineData), 1));
-
-    // center the text
-    var layout = geom.layout
-    text.position.x = -layout.width / 2
-    text.position.y = layout.height / 2
-  }
+  next(geom, text);
+  console.error('init', font, scene, camera, controls);
+  scene.add(textAnchor);
 }
