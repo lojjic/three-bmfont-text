@@ -1,15 +1,14 @@
-import * as assign from 'object-assign';
 import {Color} from 'three';
 export function createMultipageShader (opt) {
   opt = opt || {}
-  var opacity = typeof opt.opacity === 'number' ? opt.opacity : 1
-  var precision = opt.precision || 'highp'
-  var alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001
+  const opacity = typeof opt.opacity === 'number' ? opt.opacity : 1
+  const precision = opt.precision || 'highp'
+  const alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001
 
-  var textures = opt.textures || []
+  let textures = opt.textures || []
   textures = Array.isArray(textures) ? textures : [ textures ]
 
-  var baseUniforms = {}
+  const baseUniforms = {}
   textures.forEach(function (tex, i) {
     baseUniforms['texture' + i] = {
       type: 't',
@@ -17,12 +16,12 @@ export function createMultipageShader (opt) {
     }
   })
 
-  var samplers = textures.map(function (tex, i) {
+  const samplers = textures.map(function (tex, i) {
     return 'uniform sampler2D texture' + i + ';'
   }).join('\n')
 
-  var body = textures.map(function (tex, i) {
-    var cond = i === 0 ? 'if' : 'else if'
+  const body = textures.map(function (tex, i) {
+    const cond = i === 0 ? 'if' : 'else if'
     return [
       cond + ' (vPage == ' + i + '.0) {',
       'sampleColor = texture2D(texture' + i + ', vUv);',
@@ -30,7 +29,7 @@ export function createMultipageShader (opt) {
     ].join('\n')
   }).join('\n')
 
-  var color = opt.color
+  const color = opt.color
 
   // remove to satisfy r73
   delete opt.textures
@@ -38,14 +37,16 @@ export function createMultipageShader (opt) {
   delete opt.precision
   delete opt.opacity
 
-  var attributes = {
-    attributes: { page: { type: 'f', value: 0 } }
-  }
+  // this `attributes = undefined` used to be behind a check for
+  // if three.version >= 72. unsure if it's still required as yet
+  // as we don't support multi-page atlases internally yet
+  // const attributes = {
+  //   attributes: { page: { type: 'f', value: 0 } }
+  // }
+  const attributes = undefined
 
-  attributes = undefined
-
-  return assign({
-    uniforms: assign({}, baseUniforms, {
+  return Object.assign({
+    uniforms: Object.assign({}, baseUniforms, {
       opacity: { type: 'f', value: opacity },
       color: { type: 'c', value: new Color(color) }
     }),

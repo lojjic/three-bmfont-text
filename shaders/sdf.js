@@ -1,12 +1,11 @@
-import * as assign from 'object-assign';
 import {Texture, Color} from 'three';
 export function createSDFShader (opt) {
   opt = opt || {}
-  var opacity = typeof opt.opacity === 'number' ? opt.opacity : 1
-  var alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001
-  var precision = opt.precision || 'highp'
-  var color = opt.color
-  var map = opt.map
+  const opacity = typeof opt.opacity === 'number' ? opt.opacity : 1
+  const alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001
+  const precision = opt.precision || 'highp'
+  const color = opt.color
+  const map = opt.map
 
   // remove to satisfy r73
   delete opt.map
@@ -14,7 +13,7 @@ export function createSDFShader (opt) {
   delete opt.precision
   delete opt.opacity
 
-  return assign({
+  return Object.assign({
     uniforms: {
       opacity: { type: 'f', value: opacity },
       map: { type: 't', value: map || new Texture() },

@@ -1,5 +1,5 @@
-import * as createLayout from 'layout-bmfont-text';
-import * as createIndices from 'quad-indices';
+import createLayout from 'layout-bmfont-text';
+import createIndices from 'quad-indices';
 
 import {pages,positions,uvs} from './lib/vertices';
 import {computeBox, computeSphere} from './lib/utils';
@@ -8,6 +8,7 @@ import {BufferGeometry, BufferAttribute, Sphere, Box3} from 'three';
 export function createGeometry (opt) {
   return new TextGeometry(opt)
 }
+
 class TextGeometry extends BufferGeometry {
   constructor (opt) {
     super()
@@ -40,18 +41,18 @@ class TextGeometry extends BufferGeometry {
     this.layout = createLayout(opt)
 
     // get vec2 texcoords
-    var flipY = opt.flipY !== false
+    const flipY = opt.flipY !== false
 
     // the desired BMFont data
-    var font = opt.font
+    const font = opt.font
 
     // determine texture size from font file
-    var texWidth = font.common.scaleW
-    var texHeight = font.common.scaleH
+    const texWidth = font.common.scaleW
+    const texHeight = font.common.scaleH
 
     // get visible glyphs
-    var glyphs = this.layout.glyphs.filter(function (glyph) {
-      var bitmap = glyph.data
+    const glyphs = this.layout.glyphs.filter(function (glyph) {
+      const bitmap = glyph.data
       return bitmap.width * bitmap.height > 0
     })
 
@@ -59,9 +60,9 @@ class TextGeometry extends BufferGeometry {
     this.visibleGlyphs = glyphs
 
     // get common vertex data
-    var glyphPositions = positions(glyphs)
-    var glyphUvs = uvs(glyphs, texWidth, texHeight, flipY)
-    var indices = createIndices([], {
+    const glyphPositions = positions(glyphs)
+    const glyphUvs = uvs(glyphs, texWidth, texHeight, flipY)
+    const indices = createIndices([], {
       clockwise: true,
       type: 'uint16',
       count: glyphs.length
@@ -75,11 +76,10 @@ class TextGeometry extends BufferGeometry {
     // update multipage data
     if (!opt.multipage && 'page' in this.attributes) {
       // disable multipage rendering
-      this.removeAttribute('page')
+      this.deleteAttribute('page')
     } else if (opt.multipage) {
       // enable multipage rendering
-      var glyphPages = pages(glyphs)
-      this.setAttribute('page', new BufferAttribute(glyphPages, 1))
+      this.setAttribute('page', new BufferAttribute(pages(glyphs), 1))
     }
   }
 
@@ -88,8 +88,8 @@ class TextGeometry extends BufferGeometry {
       this.boundingSphere = new Sphere()
     }
 
-    var positions = this.attributes.position.array
-    var itemSize = this.attributes.position.itemSize
+    const positions = this.attributes.position.array
+    const itemSize = this.attributes.position.itemSize
     if (!positions || !itemSize || positions.length < 2) {
       this.boundingSphere.radius = 0
       this.boundingSphere.center.set(0, 0, 0)
@@ -110,9 +110,9 @@ Computed radius is NaN. The
       this.boundingBox = new Box3()
     }
 
-    var bbox = this.boundingBox
-    var positions = this.attributes.position.array
-    var itemSize = this.attributes.position.itemSize
+    const bbox = this.boundingBox
+    const positions = this.attributes.position.array
+    const itemSize = this.attributes.position.itemSize
     if (!positions || !itemSize || positions.length < 2) {
       bbox.makeEmpty()
       return
